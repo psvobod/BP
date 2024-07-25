@@ -56,18 +56,3 @@ th {
     padding: 0px;
     border: 0px;
 }
-
-#progress-container {
-    width: 100%;
-    background-color: #f3f3f3;
-    border: 1px solid #ccc;
-}
-
-#progress-bar {
-    width: 0;
-    height: 30px;
-    background-color: #4caf50;
-    text-align: center;
-    color: white;
-    line-height: 30px; /* Match the height for center alignment */
-}

@@ -8,11 +8,7 @@ let patientHLAGenes = {
   C: { '1': '', '2': ''}
 };
 
-// let patientHLAGenesLigands = {
-//   A: { '1': '', '2': ''},
-//   B: { '1': '', '2': ''},
-//   C: { '1': '', '2': ''}
-// };
+let data = [];
 
 let donorKIRgenes = {
   '2DS2': 0,
@@ -32,36 +28,26 @@ let donorKIRgenes = {
   '3DL2': 1,
 };
 
-function getRandomItem(arr) {
-    const randomIndex = Math.floor(Math.random() * arr.length);
-    return "HLA-" + arr[randomIndex];
+function getRandomElement(array) {
+  return array[Math.floor(Math.random() * array.length)];
 }
 
-function updateHLA() {
-    if (sectionA.length === 0 || sectionB.length === 0 || sectionC.length === 0) {
-        console.error('Data not loaded yet.');
-        return;
-    }
+ function updateHLA() {
+  const geneA1 = getRandomElement(data.A);
+  const geneB1 = getRandomElement(data.B);
+  const geneC1 = getRandomElement(data.C);
 
-    const geneA1 = getRandomItem(sectionA);
-    const geneB1 = getRandomItem(sectionB);
-    const geneC1 = getRandomItem(sectionC);
-    const geneA2 = getRandomItem(sectionA);
-    const geneB2 = getRandomItem(sectionB);
-    const geneC2 = getRandomItem(sectionC);
+  const geneA2 = getRandomElement(data.A);
+  const geneB2 = getRandomElement(data.B);
+  const geneC2 = getRandomElement(data.C);
 
-    document.getElementById("hla-a-row1").textContent = geneA1;
-    document.getElementById("hla-b-row1").textContent = geneB1;
-    document.getElementById("hla-c-row1").textContent = geneC1;
-    document.getElementById("hla-a-row2").textContent = geneA2;
-    document.getElementById("hla-b-row2").textContent = geneB2;
-    document.getElementById("hla-c-row2").textContent = geneC2;
-
-    patientHLAGenes = {
-      A: { '1': geneA1, '2': geneA2 },
-      B: { '1': geneB1, '2': geneB2 },
-      C: { '1': geneC1, '2': geneC2 }
-    };
+  // Update HTML elements with the name field
+  document.getElementById("hla-a-row1").textContent = geneA1 ? geneA1.name : 'N/A';
+  document.getElementById("hla-b-row1").textContent = geneB1 ? geneB1.name : 'N/A';
+  document.getElementById("hla-c-row1").textContent = geneC1 ? geneC1.name : 'N/A';
+  document.getElementById("hla-a-row2").textContent = geneA2 ? geneA2.name : 'N/A';
+  document.getElementById("hla-b-row2").textContent = geneB2 ? geneB2.name : 'N/A';
+  document.getElementById("hla-c-row2").textContent = geneC2 ? geneC2.name : 'N/A';
 }
 
 function updateHLAgene(element, HLA, number) {
@@ -100,93 +86,117 @@ function updateKIR() {
   console.log(donorKIRgenes);
 }
 
-async function getData(url) {
-    try {
-      const response = await fetch(url);
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+async function fetchAllData(url) {
+  let categorizedData = {
+      A: [],
+      B: [],
+      C: []
+  };
+  let nextUrl = url;
+  let totalItems = 0;
+  let fetchedItems = 0;
+
+  // Initial API call to get the total number of items and first batch of data
+  try {
+      const initialResponse = await fetch(nextUrl);
+      if (!initialResponse.ok) {
+          throw new Error(`HTTP error! status: ${initialResponse.status}`);
       }
-  
-      const data = await response.text();
-      return filterAndExtractData(data);
 
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      return null;
-    }
+      const initialData = await initialResponse.json();
+      totalItems = initialData.meta.total || 0;
+
+      // Categorize the data based on the name prefix
+      const categorizedBatch = categorizeData(initialData.data);
+      categorizedData = mergeCategorizedData(categorizedData, categorizedBatch);
+      fetchedItems += initialData.data.length;
+      updateProgressBar(fetchedItems, totalItems);
+      nextUrl = initialData.meta.next ? `https://www.ebi.ac.uk/cgi-bin/ipd/api/allele${initialData.meta.next}` : null;
+
+  } catch (error) {
+      console.error('Error fetching initial data:', error);
+      return;
   }
-  
-function filterAndExtractData(text) {
-  const lines = text.split('\n');
 
-  const currentAllelesRegex = /^(A\*|B\*|C\*).*;;;$/;
-  const filteredLines = lines.filter(line => currentAllelesRegex.test(line.trim()));
+  // Fetch the remaining pages of data
+  while (nextUrl) {
+      try {
+          const response = await fetch(nextUrl);
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-  const alleleLines = filteredLines.map(line => line.slice(0, line.indexOf(';', line.indexOf(';') + 1)));
+          const data = await response.json();
 
-  const functionalAllelesRegex = /N/;
-  const functionalAlleles = alleleLines.filter(line => !functionalAllelesRegex.test(line.trim()));
+          // Categorize the data based on the name prefix
+          const categorizedBatch = categorizeData(data.data);
+          categorizedData = mergeCategorizedData(categorizedData, categorizedBatch);
+          fetchedItems += data.data.length;
+          updateProgressBar(fetchedItems, totalItems);
 
-  const proteins = functionalAlleles.map(line => {
-      const firstColonIndex = line.indexOf(':');
-      const secondColonIndex = line.indexOf(':', firstColonIndex + 1);
-      return secondColonIndex !== -1 ? line.slice(0, secondColonIndex) : line;
-      });
+          nextUrl = data.meta.next ? `https://www.ebi.ac.uk/cgi-bin/ipd/api/allele${data.meta.next}` : null;
+      } catch (error) {
+          console.error('Error fetching data:', error);
+          break;
+      }
+  }
 
-  const uniqueProteins = new Set(proteins);
-  const cleanedProteins = Array.from(uniqueProteins).map(line => line.replace(/[;QL]/g, ''));
-
-  const result = cleanedProteins.join("\n");
-
-  return result;
+  return categorizedData;
 }
 
+function categorizeData(data) {
+  const categorized = {
+      A: [],
+      B: [],
+      C: []
+  };
 
-function parseTextData(text) {
-  const lines = text.trim().split('\n');
-  const sectionA = [];
-  const sectionB = [];
-  const sectionC = [];
-
-  lines.forEach(line => {
-    if (line.startsWith('A')) {
-      sectionA.push(line);
-    } else if (line.startsWith('B')) {
-      sectionB.push(line);
-    } else if (line.startsWith('C')) {
-      sectionC.push(line);
-    }
+  data.forEach(record => {
+      const name = record.name || '';
+      if (name.startsWith('A*')) {
+          categorized.A.push({
+              ligand: record['matching.kir_ligand'],
+              name: record.name
+          });
+      } else if (name.startsWith('B*')) {
+          categorized.B.push({
+              ligand: record['matching.kir_ligand'],
+              name: record.name
+          });
+      } else if (name.startsWith('C*')) {
+          categorized.C.push({
+              ligand: record['matching.kir_ligand'],
+              name: record.name
+          });
+      }
   });
 
-  return { sectionA, sectionB, sectionC };
+  return categorized;
 }
 
-// async function submit() {
-//   console.log(patientHLAGenes["A"]["1"]);
-//   const data = await getData('https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=1000&project=HLA&query=startsWith(name,B*08:03)&fields=matching.kir_ligand');
-//   if (data) {
-//     patientHLAGenesLigands["A"]["1"] = data;
-//   } else {
-//     console.log('Failed to retrieve data.');
-//   }
-// }
+function mergeCategorizedData(existingData, newData) {
+  Object.keys(newData).forEach(key => {
+      existingData[key] = existingData[key].concat(newData[key]);
+  });
+  return existingData;
+}
 
-  
+function updateProgressBar(fetched, total) {
+  const progressBar = document.getElementById('progress-bar');
+  const progress = (fetched / total) * 100;
+  progressBar.style.width = `${progress}%`;
+  progressBar.textContent = `${Math.round(progress)}%`;
+}
 
-(async () => {
-  const url = 'https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/wmda/hla_nom.txt';
-  const filteredData = await getData(url);
-  if (filteredData) {
-    //console.log('Filtered and extracted data: \n', filteredData);
-    const result = parseTextData(filteredData);
-    sectionA = result.sectionA;
-    sectionB = result.sectionB;
-    sectionC = result.sectionC;
-  } else {
-    console.log('Failed to retrieve data.');
-  }
-})();
+// Usage
+const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=HLA&query=or(startsWith(name,A*),startsWith(name,B*),startsWith(name,C*))&fields=matching.kir_ligand';
+fetchAllData(apiUrl)
+  .then(categorizedData => {
+    data = categorizedData;
+      console.log('Categorized data:', categorizedData);
+      // Further processing with categorizedData
+  })
+  .catch(error => console.error('Failed to fetch all data:', error));
 
 
 /*
