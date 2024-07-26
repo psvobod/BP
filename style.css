@@ -1,16 +1,16 @@
 #results {
     display: flex;
-    justify-content: space-around;
-    width: 50%;
-    margin: 20px auto; /* Centers the container */
+    justify-content: center;
+    align-items: flex-start;
+    width: 70%;
+    margin: auto; /* Centers the container */
     border: 1px solid #ccc;
-    padding: 10px;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   }
   
   .column {
-    width: 45%;
+    width: 100%;
   }
   
   h2 {
@@ -18,10 +18,19 @@
     color: #333;
   }
   
-  p {
-    padding: 5px;
+  #inhibitory, #activating {
+    width: 95%;
+    border-collapse: collapse;
+    margin: auto;
+  }
+  #activating-message, #inhibitory-message {
+    text-align: center;
     font-size: 1em;
     color: #555;
+    margin: 10px 0;
+  }  
+  th {
+    background-color: #f4f4f4;
   }
 
 body {
@@ -37,17 +46,29 @@ header, main {
     text-align: center;
     width: 100%;
 }
-table {
-    width: 50%;
+#HLA-table, #KIR-table {
+    width: 70%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 15px;
     margin-left: auto;
     margin-right: auto;
+    /* table-layout: fixed; */
 }
+
+#KIR-table th, #KIR-table td {
+    width: 6.25%; /* Approximately 100% / 16 columns */
+}
+
+#HLA-table th, #HLA-table td {
+    width: 33.3%; /* Approximately 100% / 16 columns */
+}
+
 th, td {
     border: 1px solid black;
     padding: 8px;
-    width: 33.33%;
+    padding-left: 3px;
+    padding-right: 3px;
+    /* width: 33.33%; */
     /* text-align: left; */
 }
 th {
@@ -66,7 +87,7 @@ th {
 }
 
 #process-button {
-    width: 50%;
+    width: 70%;
     padding: 10px;
 }
 

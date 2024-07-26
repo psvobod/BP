@@ -3,14 +3,14 @@ let patientHLAGenes = [];
 let data = [];
 
 let donorKIRgenes = {
-  '2DS2': 0, // OK
-  '2DL2': 0, // OK
-  '2DL3': 0, // OK
+  '2DS2': 0,
+  '2DL2': 0,
+  '2DL3': 0,
   '2DP1': 0,
-  '2DL1': 0, // OK
-  '3DL1': 0, // OK
+  '2DL1': 0,
+  '3DL1': 0,
   '2DS4': 0,
-  '3DS1': 0, // OK
+  '3DS1': 0,
   '2DS1': 0,
   '2DL5': 0,
   '2DS3': 0,
@@ -18,64 +18,117 @@ let donorKIRgenes = {
   '3DL3': 1,
   '3DP1': 1,
   '2DL4': 1,
-  '3DL2': 1, // OK
+  '3DL2': 1,
 };
 
 function process() {
-
-  const A0311 = patientHLAGenes.filter(gene => gene.ligand === 'A3' || gene.ligand === 'A11');
+  const A0311 = patientHLAGenes.filter(gene => {
+    if (gene.name.startsWith('A*11')) {
+      gene.ligand = 'A11';
+      return true;
+    } else if (gene.name.startsWith('A*03')) {
+      gene.ligand = 'A3';
+      return true;
+    }
+    return false;
+  });
   const A0311names = A0311.map(gene => gene.name);
+  const A0311ligands = A0311.map(gene => gene.ligand);
 
   const Bw4 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('Bw4'));
+  const Bw4ligands =  Bw4.map(gene => gene.ligand);
   const Bw4names = Bw4.map(gene => gene.name);
 
   const C1 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('C1'));
+  const C1ligands = C1.map(gene => gene.ligand);
   const C1names = C1.map(gene => gene.name);
 
   const C2 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('C2'));
+  const C2ligands = C2.map(gene => gene.ligand);
   const C2names = C2.map(gene => gene.name);
 
   // References to the HTML elements for activating and inhibitory results
-  const activatingContainer = document.getElementById('activating');
-  const inhibitoryContainer = document.getElementById('inhibitory');
+  const activatingTableBody = document.querySelector('#activating tbody');
+  const inhibitoryTableBody = document.querySelector('#inhibitory tbody');
+  const activatingMessage = document.getElementById('activating-message');
+  const inhibitoryMessage = document.getElementById('inhibitory-message');
+  const activatingTable = document.getElementById('activating');
+  const inhibitoryTable = document.getElementById('inhibitory');
 
   // Clear previous results
-  activatingContainer.innerHTML = '';
-  inhibitoryContainer.innerHTML = '';
+  activatingTableBody.innerHTML = '';
+  inhibitoryTableBody.innerHTML = '';
 
-  // Helper function to add results to the page
-  const addResult = (container, text) => {
-    const p = document.createElement('p');
-    p.textContent = text;
-    container.appendChild(p);
+  // Helper function to add rows to the table
+  const addRow = (tableBody, kirGene, ligands, hlaGenes) => {
+    hlaGenes.forEach((hlaGene, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${kirGene}</td>
+        <td>${ligands[index]}</td>
+        <td>${hlaGene}</td>
+      `;
+      tableBody.appendChild(row);
+    });
   };
 
   // Activating interactions
+  let hasActivatingInteractions = false;
+
   if (donorKIRgenes['3DS1'] == 1 && Bw4names.length > 0) {
-    addResult(activatingContainer, `3DS1 + ${Bw4names.join(', ')}`);
+    addRow(activatingTableBody, 'KIR3DS1', Bw4ligands, Bw4names);
+    hasActivatingInteractions = true;
   }
   if (donorKIRgenes['2DS2'] == 1 && C1names.length > 0) {
-    addResult(activatingContainer, `2DS2 + ${C1names.join(', ')}`);
+    addRow(activatingTableBody, 'KIR2DS2', C1ligands, C1names);
+    hasActivatingInteractions = true;
   }
   if (donorKIRgenes['2DS1'] == 1 && C2names.length > 0) {
-    addResult(activatingContainer, `2DS1 + ${C2names.join(', ')}`);
+    addRow(activatingTableBody, 'KIR2DS1', C2ligands, C2names);
+    hasActivatingInteractions = true;
+  }
+
+  if (hasActivatingInteractions) {
+    activatingTable.style.display = 'table';
+    activatingMessage.style.display = 'none';
+  } else {
+    activatingTable.style.display = 'none';
+    activatingMessage.textContent = 'No activating interactions';
+    activatingMessage.style.display = 'block';
+
   }
 
   // Inhibitory interactions
+  let hasInhibitoryInteractions = false;
+
   if (donorKIRgenes['3DL2'] == 1 && A0311.length > 0) {
-    addResult(inhibitoryContainer, `3DL2 + ${A0311names.join(', ')}`);
+    addRow(inhibitoryTableBody, 'KIR3DL2', A0311ligands, A0311names);
+    hasInhibitoryInteractions = true;
   }
   if (donorKIRgenes['3DL1'] == 1 && Bw4names.length > 0) {
-    addResult(inhibitoryContainer, `3DL1 + ${Bw4names.join(', ')}`);
+    addRow(inhibitoryTableBody, 'KIR3DL1', Bw4ligands, Bw4names);
+    hasInhibitoryInteractions = true;
   }
   if (donorKIRgenes['2DL2'] == 1 && C1names.length > 0) {
-    addResult(inhibitoryContainer, `2DL2 + ${C1names.join(', ')}`);
+    addRow(inhibitoryTableBody, 'KIR2DL2', C1ligands, C1names);
+    hasInhibitoryInteractions = true;
   }
   if (donorKIRgenes['2DL3'] == 1 && C1names.length > 0) {
-    addResult(inhibitoryContainer, `2DL3 + ${C1names.join(', ')}`);
+    addRow(inhibitoryTableBody, 'KIR2DL3', C1ligands, C1names);
+    hasInhibitoryInteractions = true;
   }
   if (donorKIRgenes['2DL1'] == 1 && C2names.length > 0) {
-    addResult(inhibitoryContainer, `2DL1 + ${C2names.join(', ')}`);
+    addRow(inhibitoryTableBody, 'KIR2DL1', C2ligands, C2names);
+    hasInhibitoryInteractions = true;
+  }
+
+  if (hasInhibitoryInteractions) {
+    inhibitoryTable.style.display = 'table';
+    inhibitoryMessage.style.display = 'none';
+  } else {
+    inhibitoryTable.style.display = 'none';
+    inhibitoryMessage.textContent = 'No inhibitory interactions';
+    inhibitoryMessage.style.display = 'block';
   }
 
   // Show the results container
@@ -158,7 +211,7 @@ function updateKIRgene(checkbox) {
 function updateKIR() {
   const kirGenes = [
       '2DS2', '2DL2', '2DL3', '2DP1', '2DL1', '3DL1', 
-      '2DS4', '3DS1', '2DL5', '2DS3', '2DS5'
+      '2DS4', '3DS1', '2DL5', '2DS3', '2DS5', '2DS1'
   ];
   kirGenes.forEach(gene => {
       const checkbox = document.getElementById(gene);
@@ -280,7 +333,7 @@ function updateProgressBar(fetched, total) {
 }
 
 // Usage
-const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=HLA&query=or(startsWith(name,A*),startsWith(name,B*),startsWith(name,C*))&fields=matching.kir_ligand';
+const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=HLA&query=and(eq(status,Public),or(startsWith(name,A*),startsWith(name,B*),startsWith(name,C*)))&fields=matching.kir_ligand';
 fetchAllData(apiUrl)
   .then(categorizedData => {
     data = categorizedData;

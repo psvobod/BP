@@ -24,7 +24,7 @@
             <div id="progress-bar">0%</div>
         </div>
 
-        <table>
+        <table id="HLA-table">
             <tr>
                 <th colspan="3">HLA typizace pacienta</th>
             </tr>
@@ -48,9 +48,8 @@
             </tr>
         </table>
         
-        <br>
 
-        <table>
+        <table id="KIR-table">
             <tr>
                 <th colspan="16">KIR typizace dárce</th>
             </tr>
@@ -104,11 +103,31 @@
         <div id="results" style="display: none;">
             <div class="column">
               <h2>Activating Interactions</h2>
-              <div id="activating"></div>
+              <div id="activating-message"></div>
+              <table id="activating" style="display: none;">
+                <thead>
+                  <tr>
+                    <th>KIR Gene Name</th>
+                    <th>KIR Ligand</th>
+                    <th>HLA Gene</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
             <div class="column">
               <h2>Inhibitory Interactions</h2>
-              <div id="inhibitory"></div>
+              <div id="inhibitory-message"></div>
+              <table id="inhibitory" style="display: none;">
+                <thead>
+                  <tr>
+                    <th>KIR Gene Name</th>
+                    <th>KIR Ligand</th>
+                    <th>HLA Gene</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
         </div>
 
