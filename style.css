@@ -1,20 +1,28 @@
-/* header, main {
-    text-align: center;
-}
-
-table {
+#results {
+    display: flex;
+    justify-content: space-around;
     width: 50%;
-    border-collapse: collapse;
-}
-th, td {
-    border: 1px solid black;
-    padding: 8px;
-    text-align: left;
-}
-th {
-    background-color: #f2f2f2;
-} */
-
+    margin: 20px auto; /* Centers the container */
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .column {
+    width: 45%;
+  }
+  
+  h2 {
+    text-align: center;
+    color: #333;
+  }
+  
+  p {
+    padding: 5px;
+    font-size: 1em;
+    color: #555;
+  }
 
 body {
     display: flex;
@@ -55,6 +63,11 @@ th {
 .update-cell {
     padding: 0px;
     border: 0px;
+}
+
+#process-button {
+    width: 50%;
+    padding: 10px;
 }
 
 #progress-container {

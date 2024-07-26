@@ -1,38 +1,93 @@
-let sectionA = [];
-let sectionB = [];
-let sectionC = [];
-
-let patientHLAGenes = {
-  A: { '1': '', '2': ''},
-  B: { '1': '', '2': ''},
-  C: { '1': '', '2': ''}
-};
+let patientHLAGenes = [];
 
 let data = [];
 
 let donorKIRgenes = {
-  '2DS2': 0,
-  '2DL2': 0,
-  '2DL3': 0,
+  '2DS2': 0, // OK
+  '2DL2': 0, // OK
+  '2DL3': 0, // OK
   '2DP1': 0,
-  '2DL1': 0,
-  '3DL1': 0,
+  '2DL1': 0, // OK
+  '3DL1': 0, // OK
   '2DS4': 0,
-  '3DS1': 0,
+  '3DS1': 0, // OK
+  '2DS1': 0,
   '2DL5': 0,
   '2DS3': 0,
   '2DS5': 0,
   '3DL3': 1,
   '3DP1': 1,
   '2DL4': 1,
-  '3DL2': 1,
+  '3DL2': 1, // OK
 };
+
+function process() {
+
+  const A0311 = patientHLAGenes.filter(gene => gene.ligand === 'A3' || gene.ligand === 'A11');
+  const A0311names = A0311.map(gene => gene.name);
+
+  const Bw4 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('Bw4'));
+  const Bw4names = Bw4.map(gene => gene.name);
+
+  const C1 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('C1'));
+  const C1names = C1.map(gene => gene.name);
+
+  const C2 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('C2'));
+  const C2names = C2.map(gene => gene.name);
+
+  // References to the HTML elements for activating and inhibitory results
+  const activatingContainer = document.getElementById('activating');
+  const inhibitoryContainer = document.getElementById('inhibitory');
+
+  // Clear previous results
+  activatingContainer.innerHTML = '';
+  inhibitoryContainer.innerHTML = '';
+
+  // Helper function to add results to the page
+  const addResult = (container, text) => {
+    const p = document.createElement('p');
+    p.textContent = text;
+    container.appendChild(p);
+  };
+
+  // Activating interactions
+  if (donorKIRgenes['3DS1'] == 1 && Bw4names.length > 0) {
+    addResult(activatingContainer, `3DS1 + ${Bw4names.join(', ')}`);
+  }
+  if (donorKIRgenes['2DS2'] == 1 && C1names.length > 0) {
+    addResult(activatingContainer, `2DS2 + ${C1names.join(', ')}`);
+  }
+  if (donorKIRgenes['2DS1'] == 1 && C2names.length > 0) {
+    addResult(activatingContainer, `2DS1 + ${C2names.join(', ')}`);
+  }
+
+  // Inhibitory interactions
+  if (donorKIRgenes['3DL2'] == 1 && A0311.length > 0) {
+    addResult(inhibitoryContainer, `3DL2 + ${A0311names.join(', ')}`);
+  }
+  if (donorKIRgenes['3DL1'] == 1 && Bw4names.length > 0) {
+    addResult(inhibitoryContainer, `3DL1 + ${Bw4names.join(', ')}`);
+  }
+  if (donorKIRgenes['2DL2'] == 1 && C1names.length > 0) {
+    addResult(inhibitoryContainer, `2DL2 + ${C1names.join(', ')}`);
+  }
+  if (donorKIRgenes['2DL3'] == 1 && C1names.length > 0) {
+    addResult(inhibitoryContainer, `2DL3 + ${C1names.join(', ')}`);
+  }
+  if (donorKIRgenes['2DL1'] == 1 && C2names.length > 0) {
+    addResult(inhibitoryContainer, `2DL1 + ${C2names.join(', ')}`);
+  }
+
+  // Show the results container
+  document.getElementById('results').style.display = 'flex';
+}
 
 function getRandomElement(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
  function updateHLA() {
+  patientHLAGenes = [];
   const geneA1 = getRandomElement(data.A);
   const geneB1 = getRandomElement(data.B);
   const geneC1 = getRandomElement(data.C);
@@ -42,12 +97,48 @@ function getRandomElement(array) {
   const geneC2 = getRandomElement(data.C);
 
   // Update HTML elements with the name field
-  document.getElementById("hla-a-row1").textContent = geneA1 ? geneA1.name : 'N/A';
-  document.getElementById("hla-b-row1").textContent = geneB1 ? geneB1.name : 'N/A';
-  document.getElementById("hla-c-row1").textContent = geneC1 ? geneC1.name : 'N/A';
-  document.getElementById("hla-a-row2").textContent = geneA2 ? geneA2.name : 'N/A';
-  document.getElementById("hla-b-row2").textContent = geneB2 ? geneB2.name : 'N/A';
-  document.getElementById("hla-c-row2").textContent = geneC2 ? geneC2.name : 'N/A';
+  document.getElementById("hla-a-row1").textContent = geneA1.name;
+  document.getElementById("hla-b-row1").textContent = geneB1.name;
+  document.getElementById("hla-c-row1").textContent = geneC1.name;
+  document.getElementById("hla-a-row2").textContent = geneA2.name;
+  document.getElementById("hla-b-row2").textContent = geneB2.name;
+  document.getElementById("hla-c-row2").textContent = geneC2.name;
+
+  patientHLAGenes.push(
+    {
+      ligand: geneA1.ligand,
+      name: geneA1.name
+    },
+    {
+      ligand: geneA2.ligand,
+      name: geneA2.name
+    }
+  );
+
+  patientHLAGenes.push(
+    {
+      ligand: geneB1.ligand,
+      name: geneB1.name
+    },
+    {
+      ligand: geneB2.ligand,
+      name: geneB2.name
+    }
+  );
+
+  patientHLAGenes.push(
+    {
+      ligand: geneC1.ligand,
+      name: geneC1.name
+    },
+    {
+      ligand: geneC2.ligand,
+      name: geneC2.name
+    }
+  );
+
+  console.log(patientHLAGenes);
+
 }
 
 function updateHLAgene(element, HLA, number) {
