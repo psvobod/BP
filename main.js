@@ -194,13 +194,106 @@ function getRandomElement(array) {
 
 }
 
-function updateHLAgene(element, HLA, number) {
-    const inputElement = document.getElementById(element);
-    const currentValue = inputElement.textContent;
-    console.log(HLA, number);
-    patientHLAGenes[HLA][number] = currentValue;
-    console.log("Current input:", currentValue);
+function updateHLAgene(elementId, HLA, number) {
+  const inputElement = document.getElementById(elementId);
+  const userInput = inputElement.textContent.trim();
+  const errorMessageElement = document.getElementById('error-message');
+
+  // Regular expression to check the format A*number, B*number, or C*number
+  const formatRegex = /^(A|B|C)\*\d+(:\d+)?$/;
+
+  // Check if the user input matches the expected format
+  if (!formatRegex.test(userInput)) {
+    errorMessageElement.textContent = 'Invalid input format.';
+    errorMessageElement.style.display = 'block';
+    return;
+  } else {
+    errorMessageElement.style.display = 'none';
+  }
+
+  // Find all genes that start with the user's input
+  const geneCategory = HLA;
+  const matchingGenes = data[geneCategory].filter(gene => gene.name.startsWith(userInput));
+
+  // If no matching genes are found, display an error message
+  if (matchingGenes.length === 0) {
+    errorMessageElement.textContent = 'No matching genes found. Please check your input.';
+    errorMessageElement.style.display = 'block';
+    return;
+  } else {
+    errorMessageElement.style.display = 'none';
+  }
+
+  // Calculate the percentages of associated KIR ligands
+  const ligandCounts = {};
+  matchingGenes.forEach(gene => {
+    const ligand = gene.ligand;
+    if (ligand) {
+      ligandCounts[ligand] = (ligandCounts[ligand] || 0) + 1;
+    }
+  });
+
+  const totalMatches = matchingGenes.length;
+  const ligandPercentages = {};
+  Object.keys(ligandCounts).forEach(ligand => {
+    ligandPercentages[ligand] = (ligandCounts[ligand] / totalMatches) * 100;
+  });
+
+  // Calculate cumulative distribution for random selection
+  let cumulativeProbability = 0;
+  const cumulativeDistribution = {};
+  Object.keys(ligandPercentages).forEach(ligand => {
+    cumulativeProbability += ligandPercentages[ligand];
+    cumulativeDistribution[ligand] = cumulativeProbability;
+  });
+
+  // Generate a random number between 0 and 100
+  const randomValue = Math.random() * 100;
+
+  // Select the ligand based on the random value
+  let selectedLigand = '';
+  Object.keys(cumulativeDistribution).some(ligand => {
+    if (randomValue <= cumulativeDistribution[ligand]) {
+      selectedLigand = `${ligand} (${ligandPercentages[ligand].toFixed(2)}%)`;
+      return true;
+    }
+    return false;
+  });
+
+  // Update the patientHLAGenes array with the best match (or the input itself if it's exact)
+  const exactMatch = matchingGenes.find(gene => gene.name === userInput);
+  patientHLAGenes[number - 1] = exactMatch || { ligand: selectedLigand, name: userInput };
+  
+  console.log('Updated HLA genes:', patientHLAGenes);
+  console.log('Ligand percentages:', ligandPercentages);
+  console.log('Selected ligand:', selectedLigand);
+  
+  // Optionally, display the ligand percentages to the user
+  displayLigandPercentages(ligandPercentages);
 }
+
+function displayLigandPercentages(ligandPercentages) {
+  const ligandInfoElement = document.getElementById('ligand-info');
+  ligandInfoElement.innerHTML = '';
+  
+  Object.keys(ligandPercentages).forEach(ligand => {
+    const percentage = ligandPercentages[ligand];
+    ligandInfoElement.innerHTML += `<p>${ligand}: ${percentage.toFixed(2)}%</p>`;
+  });
+}
+
+
+function displayLigandPercentages(ligandPercentages) {
+  // Assume you have an element to display the ligand percentages
+  const ligandInfoElement = document.getElementById('ligand-info');
+  ligandInfoElement.innerHTML = '';
+  
+  Object.keys(ligandPercentages).forEach(ligand => {
+    const percentage = ligandPercentages[ligand];
+    ligandInfoElement.innerHTML += `<p>${ligand}: ${percentage.toFixed(2)}%</p>`;
+  });
+}
+
 
 function updateKIRgene(checkbox) {
   const gene = checkbox.id;
