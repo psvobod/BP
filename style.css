@@ -4,6 +4,7 @@
     align-items: flex-start;
     width: 70%;
     margin: auto; /* Centers the container */
+    margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
@@ -23,6 +24,7 @@
     width: 95%;
     border-collapse: collapse;
     margin: auto;
+    margin-bottom: 10px;
   }
   #activating-message, #inhibitory-message {
     text-align: center;
@@ -53,14 +55,13 @@ header, main {
     margin-top: 15px;
     margin-left: auto;
     margin-right: auto;
-    /* table-layout: fixed; */
 }
 
 #KIR-table th, #KIR-table td {
     width: 6.25%; /* Approximately 100% / 16 columns */
 }
 
-#HLA-table th, #HLA-table td {
+#HLA-table th, #HLA-table td, #inhibitory th, #inhibitory td,  #activating th, #activating td{
     width: 33.3%; /* Approximately 100% / 16 columns */
 }
 
@@ -69,8 +70,6 @@ th, td {
     padding: 8px;
     padding-left: 3px;
     padding-right: 3px;
-    /* width: 33.33%; */
-    /* text-align: left; */
 }
 th {
     background-color: #f2f2f2;
@@ -93,9 +92,11 @@ th {
 }
 
 #progress-container {
-    width: 100%;
+    width: 70%;
     background-color: #f3f3f3;
     border: 1px solid #ccc;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #progress-bar {
@@ -104,5 +105,5 @@ th {
     background-color: #4caf50;
     text-align: center;
     color: white;
-    line-height: 30px; /* Match the height for center alignment */
+    line-height: 30px;
 }

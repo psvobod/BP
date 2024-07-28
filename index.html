@@ -34,14 +34,14 @@
                 <th>HLA-C</th>
             </tr>
             <tr>
-                <td contenteditable="true" id="hla-a-row1" oninput="updateHLAgene('hla-a-row1','A', '1')"></td>
+                <td contenteditable="true" id="hla-a-row1" oninput="updateHLAgene('hla-a-row1','A', '0')"></td>
                 <td contenteditable="true" id="hla-b-row1" oninput="updateHLAgene('hla-b-row1','B', '1')"></td>
-                <td contenteditable="true" id="hla-c-row1" oninput="updateHLAgene('hla-c-row1','C', '1')"></td>
+                <td contenteditable="true" id="hla-c-row1" oninput="updateHLAgene('hla-c-row1','C', '2')"></td>
             </tr>
             <tr>
-                <td contenteditable="true" id="hla-a-row2" oninput="updateHLAgene('hla-a-row2','A', '2')"></td>
-                <td contenteditable="true" id="hla-b-row2" oninput="updateHLAgene('hla-b-row2','B', '2')"></td>
-                <td contenteditable="true" id="hla-c-row2" oninput="updateHLAgene('hla-c-row2','C', '2')"></td>
+                <td contenteditable="true" id="hla-a-row2" oninput="updateHLAgene('hla-a-row2','A', '3')"></td>
+                <td contenteditable="true" id="hla-b-row2" oninput="updateHLAgene('hla-b-row2','B', '4')"></td>
+                <td contenteditable="true" id="hla-c-row2" oninput="updateHLAgene('hla-c-row2','C', '5')"></td>
             </tr>
             <tr>
                 <th class="update-cell" colspan="3"><button class ="update" onclick="updateHLA()">Vygenerovat náhodnou HLA typizaci</button></th>
@@ -94,10 +94,10 @@
             </tr>
         </table>
 
-
-        <span id="error-message"></span>
-        <span id="ligand-info"></span>
         <br>
+        <div id="error-message"></div>
+        <div id="ligand-info"></div>
+        
 
         <button id="process-button" onclick="process()">Vyhodnotit</button>
 
@@ -110,7 +110,7 @@
               <table id="activating" style="display: none;">
                 <thead>
                   <tr>
-                    <th>KIR Gene Name</th>
+                    <th>KIR Gene</th>
                     <th>KIR Ligand</th>
                     <th>HLA Gene</th>
                   </tr>
@@ -124,7 +124,7 @@
               <table id="inhibitory" style="display: none;">
                 <thead>
                   <tr>
-                    <th>KIR Gene Name</th>
+                    <th>KIR Gene</th>
                     <th>KIR Ligand</th>
                     <th>HLA Gene</th>
                   </tr>

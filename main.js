@@ -22,11 +22,22 @@ let donorKIRgenes = {
 };
 
 function process() {
-  const A0311 = patientHLAGenes.filter(gene => {
-    if (gene.name.startsWith('A*11')) {
+
+  const A11 = patientHLAGenes.filter(gene => {
+    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
       gene.ligand = 'A11';
       return true;
-    } else if (gene.name.startsWith('A*03')) {
+    }
+    return false;
+  });
+  const A11names = A11.map(gene => gene.name);
+  const A11ligands = A11.map(gene => gene.ligand);
+  
+  const A0311 = patientHLAGenes.filter(gene => {
+    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
+      gene.ligand = 'A11';
+      return true;
+    } else if (gene.name.startsWith('A*03') && !gene.name.endsWith('N') ) {
       gene.ligand = 'A3';
       return true;
     }
@@ -35,11 +46,28 @@ function process() {
   const A0311names = A0311.map(gene => gene.name);
   const A0311ligands = A0311.map(gene => gene.ligand);
 
-  const Bw4 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('Bw4'));
+  const Bw4 = patientHLAGenes.filter(gene => {
+    if (gene.ligand && gene.ligand.startsWith('Bw4')) {
+      return true;
+    } else if (['A*23', 'A*24', 'A*32'].some(prefix => gene.name.startsWith(prefix)) && !gene.name.endsWith('N')) {
+      gene.ligand = 'Bw4';
+      return true;
+    }
+    return false;
+  });
+
   const Bw4ligands =  Bw4.map(gene => gene.ligand);
   const Bw4names = Bw4.map(gene => gene.name);
 
-  const C1 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('C1'));
+  const C1 = patientHLAGenes.filter(gene => {
+    if (gene.ligand && gene.ligand.startsWith('C1')) {
+      return true;
+    } else if (['B*46', 'B*73'].some(prefix => gene.name.startsWith(prefix)) && !gene.name.endsWith('N')) {
+      gene.ligand = 'C1';
+      return true;
+    }
+    return false;
+  });
   const C1ligands = C1.map(gene => gene.ligand);
   const C1names = C1.map(gene => gene.name);
 
@@ -75,16 +103,44 @@ function process() {
   // Activating interactions
   let hasActivatingInteractions = false;
 
+  // 
   if (donorKIRgenes['3DS1'] == 1 && Bw4names.length > 0) {
     addRow(activatingTableBody, 'KIR3DS1', Bw4ligands, Bw4names);
     hasActivatingInteractions = true;
   }
+
+  // OK
   if (donorKIRgenes['2DS2'] == 1 && C1names.length > 0) {
     addRow(activatingTableBody, 'KIR2DS2', C1ligands, C1names);
     hasActivatingInteractions = true;
   }
+  if (donorKIRgenes['2DS2'] == 1 && A11names.length > 0) {
+    addRow(activatingTableBody, 'KIR2DS2', A11ligands, A11names);
+    hasActivatingInteractions = true;
+  }
+
+  // OK
   if (donorKIRgenes['2DS1'] == 1 && C2names.length > 0) {
     addRow(activatingTableBody, 'KIR2DS1', C2ligands, C2names);
+    hasActivatingInteractions = true;
+  }
+
+  // OK
+  if (donorKIRgenes['2DS4'] == 1 && A11names.length > 0) {
+    addRow(activatingTableBody, 'KIR2DS4', A11ligands, A11names);
+    hasActivatingInteractions = true;
+  }
+  if (donorKIRgenes['2DS4'] == 1) {
+    patientHLAGenes.forEach(gene => {
+      if (['C*01:02', 'C*02:02', 'C*04:01', 'C*05:01', 'C*14:02', 'C*16:01'].some(prefix => gene.name.startsWith(prefix)) && !gene.name.endsWith('N')) {
+        addRow(activatingTableBody, 'KIR2DS4', '-',  gene.name);
+        hasActivatingInteractions = true;
+      }
+    });
+  }
+
+  if (donorKIRgenes['2DS5'] == 1 && C2names.length > 0) {
+    addRow(activatingTableBody, 'KIR2DS4', C2ligands, C2names);
     hasActivatingInteractions = true;
   }
 
@@ -101,22 +157,54 @@ function process() {
   // Inhibitory interactions
   let hasInhibitoryInteractions = false;
 
+  // OK
   if (donorKIRgenes['3DL2'] == 1 && A0311.length > 0) {
     addRow(inhibitoryTableBody, 'KIR3DL2', A0311ligands, A0311names);
     hasInhibitoryInteractions = true;
   }
+
+  // OK
   if (donorKIRgenes['3DL1'] == 1 && Bw4names.length > 0) {
     addRow(inhibitoryTableBody, 'KIR3DL1', Bw4ligands, Bw4names);
     hasInhibitoryInteractions = true;
   }
+
+  // OK
   if (donorKIRgenes['2DL2'] == 1 && C1names.length > 0) {
     addRow(inhibitoryTableBody, 'KIR2DL2', C1ligands, C1names);
     hasInhibitoryInteractions = true;
   }
+  if (donorKIRgenes['2DL2'] == 1 && C2names.length > 0) {
+    addRow(inhibitoryTableBody, 'KIR2DL2', C2ligands, C2names);
+    hasInhibitoryInteractions = true;
+  }
+  if (donorKIRgenes['2DL2'] == 1) {
+    patientHLAGenes.forEach(gene => {
+      if (gene.name.startsWith('B*46:01') || gene.name.startsWith('B*73:01')) {
+        addRow(inhibitoryTableBody, 'KIR2DL2', '-',  gene.name);
+        hasInhibitoryInteractions = true;
+      }
+    });
+  }
+  
   if (donorKIRgenes['2DL3'] == 1 && C1names.length > 0) {
     addRow(inhibitoryTableBody, 'KIR2DL3', C1ligands, C1names);
     hasInhibitoryInteractions = true;
   }
+  if (donorKIRgenes['2DL3'] == 1 && C2names.length > 0) {
+    addRow(inhibitoryTableBody, 'KIR2DL3', C2ligands, C2names);
+    hasInhibitoryInteractions = true;
+  }
+  if (donorKIRgenes['2DL3'] == 1) {
+    patientHLAGenes.forEach(gene => {
+      if (gene.name.startsWith('B*46:01') || gene.name.startsWith('B*73:01')) {
+        addRow(inhibitoryTableBody, 'KIR2DL3', '-',  gene.name);
+        hasInhibitoryInteractions = true;
+      }
+    });
+  }
+
+  // OK
   if (donorKIRgenes['2DL1'] == 1 && C2names.length > 0) {
     addRow(inhibitoryTableBody, 'KIR2DL1', C2ligands, C2names);
     hasInhibitoryInteractions = true;
@@ -157,38 +245,41 @@ function getRandomElement(array) {
   document.getElementById("hla-b-row2").textContent = geneB2.name;
   document.getElementById("hla-c-row2").textContent = geneC2.name;
 
-  patientHLAGenes.push(
+  patientHLAGenes[0] = 
     {
       ligand: geneA1.ligand,
       name: geneA1.name
-    },
+    };
+
+  patientHLAGenes[3] = 
     {
       ligand: geneA2.ligand,
       name: geneA2.name
-    }
-  );
+    };
 
-  patientHLAGenes.push(
+  patientHLAGenes[1] = 
     {
       ligand: geneB1.ligand,
       name: geneB1.name
-    },
+    };
+
+  patientHLAGenes[4] = 
     {
       ligand: geneB2.ligand,
       name: geneB2.name
     }
-  );
-
-  patientHLAGenes.push(
+  
+  patientHLAGenes[2] = 
     {
       ligand: geneC1.ligand,
       name: geneC1.name
-    },
+    };
+
+  patientHLAGenes[5] = 
     {
       ligand: geneC2.ligand,
       name: geneC2.name
-    }
-  );
+    };
 
   console.log(patientHLAGenes);
 
@@ -200,11 +291,11 @@ function updateHLAgene(elementId, HLA, number) {
   const errorMessageElement = document.getElementById('error-message');
 
   // Regular expression to check the format A*number, B*number, or C*number
-  const formatRegex = /^(A|B|C)\*\d+(:\d+)?$/;
+  const formatRegex = /^(A|B|C)\*\d+(:\d*)?$/;
 
   // Check if the user input matches the expected format
   if (!formatRegex.test(userInput)) {
-    errorMessageElement.textContent = 'Invalid input format.';
+    errorMessageElement.textContent = 'Invalid input format. Please use A*number, B*number, or C*number.';
     errorMessageElement.style.display = 'block';
     return;
   } else {
@@ -224,13 +315,11 @@ function updateHLAgene(elementId, HLA, number) {
     errorMessageElement.style.display = 'none';
   }
 
-  // Calculate the percentages of associated KIR ligands
-  const ligandCounts = {};
+  // Calculate the percentages of associated KIR ligands, including null ligands
+  const ligandCounts = { 'null': 0 }; // Initialize null ligand count
   matchingGenes.forEach(gene => {
-    const ligand = gene.ligand;
-    if (ligand) {
-      ligandCounts[ligand] = (ligandCounts[ligand] || 0) + 1;
-    }
+    const ligand = gene.ligand || 'null'; // Treat undefined ligands as 'null'
+    ligandCounts[ligand] = (ligandCounts[ligand] || 0) + 1;
   });
 
   const totalMatches = matchingGenes.length;
@@ -238,38 +327,28 @@ function updateHLAgene(elementId, HLA, number) {
   Object.keys(ligandCounts).forEach(ligand => {
     ligandPercentages[ligand] = (ligandCounts[ligand] / totalMatches) * 100;
   });
-
-  // Calculate cumulative distribution for random selection
-  let cumulativeProbability = 0;
-  const cumulativeDistribution = {};
-  Object.keys(ligandPercentages).forEach(ligand => {
-    cumulativeProbability += ligandPercentages[ligand];
-    cumulativeDistribution[ligand] = cumulativeProbability;
-  });
-
-  // Generate a random number between 0 and 100
-  const randomValue = Math.random() * 100;
-
-  // Select the ligand based on the random value
-  let selectedLigand = '';
-  Object.keys(cumulativeDistribution).some(ligand => {
-    if (randomValue <= cumulativeDistribution[ligand]) {
-      selectedLigand = `${ligand} (${ligandPercentages[ligand].toFixed(2)}%)`;
-      return true;
-    }
-    return false;
-  });
-
-  // Update the patientHLAGenes array with the best match (or the input itself if it's exact)
-  const exactMatch = matchingGenes.find(gene => gene.name === userInput);
-  patientHLAGenes[number - 1] = exactMatch || { ligand: selectedLigand, name: userInput };
   
+  // Randomly select a gene from the matching genes
+  const randomGeneIndex = Math.floor(Math.random() * matchingGenes.length);
+  const selectedGene = matchingGenes[randomGeneIndex];
+  const selectedLigand = selectedGene.ligand || 'null';
+
+  // Find the percentage of the selected ligand
+  const selectedLigandPercentage = ligandPercentages[selectedLigand] || 0;
+
+  // Update the patientHLAGenes array with the selected gene and ligand percentage
+  const exactMatch = matchingGenes.find(gene => gene.name === userInput);
+  patientHLAGenes[number] = exactMatch || {
+    ligand: `${selectedLigand} (${selectedLigandPercentage.toFixed(2)}%)`,
+    name: userInput
+  };
+
   console.log('Updated HLA genes:', patientHLAGenes);
+  console.log('Selected gene and ligand:', selectedGene.name, selectedLigand);
   console.log('Ligand percentages:', ligandPercentages);
-  console.log('Selected ligand:', selectedLigand);
   
   // Optionally, display the ligand percentages to the user
-  displayLigandPercentages(ligandPercentages);
+  //displayLigandPercentages(ligandPercentages);
 }
 
 function displayLigandPercentages(ligandPercentages) {
@@ -278,7 +357,7 @@ function displayLigandPercentages(ligandPercentages) {
   
   Object.keys(ligandPercentages).forEach(ligand => {
     const percentage = ligandPercentages[ligand];
-    ligandInfoElement.innerHTML += `<p>${ligand}: ${percentage.toFixed(2)}%</p>`;
+    ligandInfoElement.innerHTML += `<p>${ligand === 'null' ? 'null' : ligand}: ${percentage.toFixed(2)}%</p>`;
   });
 }
 
@@ -298,7 +377,7 @@ function displayLigandPercentages(ligandPercentages) {
 function updateKIRgene(checkbox) {
   const gene = checkbox.id;
   donorKIRgenes[gene] = checkbox.checked ? 1 : 0;
-  console.log(donorKIRgenes);
+  //console.log(donorKIRgenes);
 }
 
 function updateKIR() {
@@ -320,7 +399,7 @@ function updateKIR() {
       donorKIRgenes[gene] = 1;
   });
 
-  console.log(donorKIRgenes);
+  //console.log(donorKIRgenes);
 }
 
 async function fetchAllData(url) {
@@ -426,11 +505,12 @@ function updateProgressBar(fetched, total) {
 }
 
 // Usage
-const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=HLA&query=and(eq(status,Public),or(startsWith(name,A*),startsWith(name,B*),startsWith(name,C*)))&fields=matching.kir_ligand';
+const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=HLA&query=and(or(startsWith(name,"C*"),startsWith(name,"B*"),startsWith(name,"A*")),eq(status,"Public"))&fields=matching.kir_ligand';
+
 fetchAllData(apiUrl)
   .then(categorizedData => {
     data = categorizedData;
-      console.log('Categorized data:', categorizedData);
+      //console.log('Categorized data:', categorizedData);
       // Further processing with categorizedData
   })
   .catch(error => console.error('Failed to fetch all data:', error));
