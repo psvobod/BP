@@ -89,6 +89,7 @@ function process() {
 
   // Helper function to add rows to the table
   const addRow = (tableBody, kirGene, ligands, hlaGenes) => {
+    console.log(hlaGenes);
     hlaGenes.forEach((hlaGene, index) => {
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -133,7 +134,9 @@ function process() {
   if (donorKIRgenes['2DS4'] == 1) {
     patientHLAGenes.forEach(gene => {
       if (['C*01:02', 'C*02:02', 'C*04:01', 'C*05:01', 'C*14:02', 'C*16:01'].some(prefix => gene.name.startsWith(prefix)) && !gene.name.endsWith('N')) {
-        addRow(activatingTableBody, 'KIR2DS4', '-',  gene.name);
+        const name = [];
+        name[0] = gene.name;
+        addRow(activatingTableBody, 'KIR2DS4', '-',  name);
         hasActivatingInteractions = true;
       }
     });
@@ -149,7 +152,7 @@ function process() {
     activatingMessage.style.display = 'none';
   } else {
     activatingTable.style.display = 'none';
-    activatingMessage.textContent = 'No activating interactions';
+    activatingMessage.textContent = 'Žádné aktivační interakce';
     activatingMessage.style.display = 'block';
 
   }
@@ -181,7 +184,7 @@ function process() {
   if (donorKIRgenes['2DL2'] == 1) {
     patientHLAGenes.forEach(gene => {
       if (gene.name.startsWith('B*46:01') || gene.name.startsWith('B*73:01')) {
-        addRow(inhibitoryTableBody, 'KIR2DL2', '-',  gene.name);
+        addRow(inhibitoryTableBody, 'KIR2DL2', '-',  new Array(gene.name));
         hasInhibitoryInteractions = true;
       }
     });
@@ -198,7 +201,9 @@ function process() {
   if (donorKIRgenes['2DL3'] == 1) {
     patientHLAGenes.forEach(gene => {
       if (gene.name.startsWith('B*46:01') || gene.name.startsWith('B*73:01')) {
-        addRow(inhibitoryTableBody, 'KIR2DL3', '-',  gene.name);
+        const name = [];
+        name[0] = gene.name;
+        addRow(inhibitoryTableBody, 'KIR2DL3', '-',  name);
         hasInhibitoryInteractions = true;
       }
     });
@@ -215,7 +220,7 @@ function process() {
     inhibitoryMessage.style.display = 'none';
   } else {
     inhibitoryTable.style.display = 'none';
-    inhibitoryMessage.textContent = 'No inhibitory interactions';
+    inhibitoryMessage.textContent = 'Žádné inhibiční interakce';
     inhibitoryMessage.style.display = 'block';
   }
 
@@ -291,11 +296,11 @@ function updateHLAgene(elementId, HLA, number) {
   const errorMessageElement = document.getElementById('error-message');
 
   // Regular expression to check the format A*number, B*number, or C*number
-  const formatRegex = /^(A|B|C)\*\d+(:\d*)?$/;
+  const formatRegex = /^(A|B|C)\*\d+(:\d+){0,3}[A-Z]?$|^(A|B|C)\*\d+(:\d+){0,3}:$/;
 
   // Check if the user input matches the expected format
   if (!formatRegex.test(userInput)) {
-    errorMessageElement.textContent = 'Invalid input format. Please use A*number, B*number, or C*number.';
+    errorMessageElement.textContent = 'Neplatný vstupní formát.';
     errorMessageElement.style.display = 'block';
     return;
   } else {
@@ -308,7 +313,7 @@ function updateHLAgene(elementId, HLA, number) {
 
   // If no matching genes are found, display an error message
   if (matchingGenes.length === 0) {
-    errorMessageElement.textContent = 'No matching genes found. Please check your input.';
+    errorMessageElement.textContent = 'Nenalezeny žádné takové geny, zkontolujte vstup.';
     errorMessageElement.style.display = 'block';
     return;
   } else {
@@ -510,8 +515,6 @@ const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=
 fetchAllData(apiUrl)
   .then(categorizedData => {
     data = categorizedData;
-      //console.log('Categorized data:', categorizedData);
-      // Further processing with categorizedData
   })
   .catch(error => console.error('Failed to fetch all data:', error));
 
