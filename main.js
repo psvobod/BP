@@ -113,30 +113,27 @@ function process() {
   // Helper function to add rows to the table
   const addRow = (tableBody, kirGene, ligands, hlaGenes) => {
     hlaGenes.forEach((hlaGene, index) => {
+        const matchingGene = patientHLAGenesPossibilities.find(entry => entry && entry.name === hlaGene);
+        let ligandsToDisplay = '';
+        if (matchingGene && matchingGene.ligand.length > 1) {
+            ligandsToDisplay = matchingGene.ligand.join('<br>');
+        }
 
-      const matchingGene = patientHLAGenesPossibilities.find(entry => entry && entry.name === hlaGene);
-      let ligandsToDisplay;
-      if (matchingGene && matchingGene.ligand.length > 1) {
-        ligandsToDisplay = matchingGene.ligand.join('<br>');
-      }
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${kirGene}</td>
+            <td>
+                <div class="tooltip">
+                  <span class="kir-ligand">${ligands[index]}</span>
+                  ${matchingGene && matchingGene.ligand.length > 1 ? '<button class="toggle-ligands">+</button>' : ''}
+                  <div class="tooltip-text">${ligandsToDisplay}</div>
+                </div>
+            </td>
+            <td>${hlaGene}</td>
+        `;
 
-
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${kirGene}</td>
-
-        <td>
-          <span class="kir-ligand">${ligands[index]}</span>
-
-          ${matchingGene && matchingGene.ligand.length > 1 ? '<button class="toggle-ligands">+</button>' : ''}
-          <div class="other-ligands" style="display: none;">
-            ${ligandsToDisplay}
-          </div>
-        </td>
-
-        <td>${hlaGene}</td>
-      `;
-      tableBody.appendChild(row);
+        // Append the row to the table
+        tableBody.appendChild(row);
     });
   };
 
@@ -166,12 +163,13 @@ function process() {
 
   // Add event listeners for the toggle buttons
   document.querySelectorAll('.toggle-ligands').forEach(button => {
-    button.addEventListener('click', () => {
-      const otherLigands = button.nextElementSibling;
-      otherLigands.style.display = otherLigands.style.display === 'none' ? 'block' : 'none';
-      button.textContent = otherLigands.style.display === 'none' ? '+' : '-';
+    button.addEventListener('click', (event) => {
+        const tooltip = event.target.nextElementSibling;
+        const tooltipContainer = event.target.parentElement;
+        tooltipContainer.classList.toggle('active');
+        event.target.textContent = tooltipContainer.classList.contains('active') ? '-' : '+';
     });
-  });
+});
 }
 
 function getRandomElement(array) {

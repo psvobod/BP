@@ -107,3 +107,33 @@ th {
     color: white;
     line-height: 30px;
 }
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 200px; /* Adjust width as needed */
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Adjust as needed */
+    left: 50%;
+    margin-left: -100px; /* Adjust as needed */
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Show the tooltip text when the 'active' class is added */
+.tooltip.active .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
