@@ -10,6 +10,8 @@ const progressBar = document.getElementById('progress-bar');
 
 let patientHLAGenes = [];
 
+let patientHLAGenesPossibilities = [];
+
 let data = [];
 
 let donorKIRgenes = {
@@ -111,10 +113,27 @@ function process() {
   // Helper function to add rows to the table
   const addRow = (tableBody, kirGene, ligands, hlaGenes) => {
     hlaGenes.forEach((hlaGene, index) => {
+
+      const matchingGene = patientHLAGenesPossibilities.find(entry => entry && entry.name === hlaGene);
+      let ligandsToDisplay;
+      if (matchingGene && matchingGene.ligand.length > 1) {
+        ligandsToDisplay = matchingGene.ligand.join('<br>');
+      }
+
+
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${kirGene}</td>
-        <td>${ligands[index]}</td>
+
+        <td>
+          <span class="kir-ligand">${ligands[index]}</span>
+
+          ${matchingGene && matchingGene.ligand.length > 1 ? '<button class="toggle-ligands">+</button>' : ''}
+          <div class="other-ligands" style="display: none;">
+            ${ligandsToDisplay}
+          </div>
+        </td>
+
         <td>${hlaGene}</td>
       `;
       tableBody.appendChild(row);
@@ -144,6 +163,15 @@ function process() {
   inhibitoryMessage.style.display = hasInhibitoryInteractions ? 'none' : 'block';
 
   document.getElementById('results').style.display = 'flex';
+
+  // Add event listeners for the toggle buttons
+  document.querySelectorAll('.toggle-ligands').forEach(button => {
+    button.addEventListener('click', () => {
+      const otherLigands = button.nextElementSibling;
+      otherLigands.style.display = otherLigands.style.display === 'none' ? 'block' : 'none';
+      button.textContent = otherLigands.style.display === 'none' ? '+' : '-';
+    });
+  });
 }
 
 function getRandomElement(array) {
@@ -211,10 +239,8 @@ function updateHLA() {
 function updateHLAgene(elementId, HLA, number) {
   const inputElement = document.getElementById(elementId);
   const userInput = inputElement.textContent.trim();
-  // Regular expression to check the format A*number, B*number, or C*number
   const formatRegex = /^(A|B|C)\*\d+(:\d+){0,3}[A-Z]?$|^(A|B|C)\*\d+(:\d+){0,3}:$/;
 
-  // Check if the user input matches the expected format
   if (!formatRegex.test(userInput)) {
     errorMessageElement.textContent = 'Neplatný vstupní formát.';
     errorMessageElement.style.display = 'block';
@@ -227,7 +253,6 @@ function updateHLAgene(elementId, HLA, number) {
   const geneCategory = HLA;
   const matchingGenes = data[geneCategory].filter(gene => gene.name.startsWith(userInput));
 
-  // If no matching genes are found, display an error message
   if (matchingGenes.length === 0) {
     errorMessageElement.textContent = 'Nenalezeny žádné takové geny, zkontolujte vstup.';
     errorMessageElement.style.display = 'block';
@@ -236,10 +261,9 @@ function updateHLAgene(elementId, HLA, number) {
     errorMessageElement.style.display = 'none';
   }
 
-  // Calculate the percentages of associated KIR ligands, including null ligands
-  const ligandCounts = { 'null': 0 }; // Initialize null ligand count
+  const ligandCounts = { 'null': 0 };
   matchingGenes.forEach(gene => {
-    const ligand = gene.ligand || 'null'; // Treat undefined ligands as 'null'
+    const ligand = gene.ligand || 'null';
     ligandCounts[ligand] = (ligandCounts[ligand] || 0) + 1;
   });
 
@@ -257,10 +281,21 @@ function updateHLAgene(elementId, HLA, number) {
   // Find the percentage of the selected ligand
   const selectedLigandPercentage = ligandPercentages[selectedLigand] || 0;
 
+  const ligandPercentageInfo = Object.entries(ligandPercentages)
+  .sort(([, a], [, b]) => b - a) // Sort by percentage in descending order
+  .map(([ligand, percentage]) => `${ligand} (${percentage.toFixed(2)}%)`);
+
+
   // Update the patientHLAGenes array with the selected gene and ligand percentage
   const exactMatch = matchingGenes.find(gene => gene.name === userInput);
+
   patientHLAGenes[number] = exactMatch || {
     ligand: `${selectedLigand} (${selectedLigandPercentage.toFixed(2)}%)`,
+    name: userInput
+  };
+  
+  patientHLAGenesPossibilities[number] = exactMatch || {
+    ligand: ligandPercentageInfo,
     name: userInput
   };
 
@@ -268,29 +303,7 @@ function updateHLAgene(elementId, HLA, number) {
   console.log('Selected gene and ligand:', selectedGene.name, selectedLigand);
   console.log('Ligand percentages:', ligandPercentages);
   
-  // Optionally, display the ligand percentages to the user
-  //displayLigandPercentages(ligandPercentages);
 }
-
-function displayLigandPercentages(ligandPercentages) {
-  ligandInfoElement.innerHTML = '';
-  
-  Object.keys(ligandPercentages).forEach(ligand => {
-    const percentage = ligandPercentages[ligand];
-    ligandInfoElement.innerHTML += `<p>${ligand === 'null' ? 'null' : ligand}: ${percentage.toFixed(2)}%</p>`;
-  });
-}
-
-
-function displayLigandPercentages(ligandPercentages) {
-  ligandInfoElement.innerHTML = '';
-  
-  Object.keys(ligandPercentages).forEach(ligand => {
-    const percentage = ligandPercentages[ligand];
-    ligandInfoElement.innerHTML += `<p>${ligand}: ${percentage.toFixed(2)}%</p>`;
-  });
-}
-
 
 function updateKIRgene(checkbox) {
   const gene = checkbox.id;
