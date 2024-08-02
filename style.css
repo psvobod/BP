@@ -116,20 +116,21 @@ th {
 /* Tooltip text */
 .tooltip .tooltip-text {
     visibility: hidden;
-    width: 200px; /* Adjust width as needed */
-    background-color: #555;
-    color: #fff;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px;
+    background-color: #efefef; /* Darker background for better visibility */
+    border: 1px solid;
+    color: #000000;
+    text-align: left; /* Left-align text */
+    border-radius: 6px; /* Rounded corners */
+    padding: 7px; /* Padding for better readability */
     position: absolute;
     z-index: 1;
-    bottom: 125%; /* Adjust as needed */
-    left: 50%;
-    margin-left: -100px; /* Adjust as needed */
+    top: 50%; /* Center vertically */
+    left: 105%; /* Position to the right of the button */
+    transform: translateY(-50%); /* Center vertically in relation to the button */
     opacity: 0;
     transition: opacity 0.3s;
     white-space: nowrap; /* Prevent text wrapping */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
 }
 
 /* Show the tooltip text when the 'active' class is added */
