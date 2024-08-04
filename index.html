@@ -43,6 +43,35 @@
                 <td contenteditable="true" id="hla-b-row2" oninput="updateHLAgene('hla-b-row2','B', '4')"></td>
                 <td contenteditable="true" id="hla-c-row2" oninput="updateHLAgene('hla-c-row2','C', '5')"></td>
             </tr>
+
+            <!-- <tr>
+                <td contenteditable="true" id="hla-a-row1-container" oninput="updateHLAgene('hla-a-row1','A', '0')">
+                    <div id="hla-a-row1"> </div>
+                    <div class="error-message"></div>
+                </td>
+                <td contenteditable="true" id="hla-b-row1-container" oninput="updateHLAgene('hla-b-row1','B', '1')">
+                    <div id="hla-b-row1"> </div>
+                    <div class="error-message"></div>
+                </td>
+                <td contenteditable="true" id="hla-c-row1-container" oninput="updateHLAgene('hla-c-row1','C', '2')">
+                    <div id="hla-c-row1"> </div>
+                    <div class="error-message"></div>
+                </td>
+            </tr>
+            <tr>
+                <td contenteditable="true" id="hla-a-row2-container" oninput="updateHLAgene('hla-a-row2','A', '3')">
+                    <div id="hla-a-row2"> </div>
+                    <div class="error-message"></div>
+                </td>
+                <td contenteditable="true" id="hla-b-row2-container" oninput="updateHLAgene('hla-b-row2','B', '4')">
+                    <div id="hla-b-row2"> </div>
+                    <div class="error-message"></div>
+                </td>
+                <td contenteditable="true" id="hla-c-row2-container" oninput="updateHLAgene('hla-c-row2','C', '5')">
+                    <div id="hla-c-row2"> </div>
+                    <div class="error-message"></div>
+                </td>
+            </tr> -->
             <tr>
                 <th class="update-cell" colspan="3"><button class ="update" onclick="updateHLA()">Vygenerovat náhodnou HLA typizaci</button></th>
             </tr>
@@ -95,7 +124,7 @@
         </table>
 
         <br>
-        <div id="error-message"></div>       
+        <div id="error-message-after"></div>       
 
         <button id="process-button" onclick="process()">Vyhodnotit</button>
 

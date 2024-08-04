@@ -4,7 +4,7 @@ const activatingMessage = document.getElementById('activating-message');
 const inhibitoryMessage = document.getElementById('inhibitory-message');
 const activatingTable = document.getElementById('activating');
 const inhibitoryTable = document.getElementById('inhibitory');
-const errorMessageElement = document.getElementById('error-message');
+const errorMessageElement = document.getElementById('error-message-after');
 const ligandInfoElement = document.getElementById('ligand-info');
 const progressBar = document.getElementById('progress-bar');
 
@@ -35,29 +35,6 @@ let donorKIRgenes = {
 
 function process() {
 
-  const A11 = patientHLAGenes.filter(gene => {
-    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
-      gene.ligand = 'A11';
-      return true;
-    }
-    return false;
-  });
-  const A11names = A11.map(gene => gene.name);
-  const A11ligands = A11.map(gene => gene.ligand);
-  
-  const A0311 = patientHLAGenes.filter(gene => {
-    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
-      gene.ligand = 'A11';
-      return true;
-    } else if (gene.name.startsWith('A*03') && !gene.name.endsWith('N') ) {
-      gene.ligand = 'A3';
-      return true;
-    }
-    return false;
-  });
-  const A0311names = A0311.map(gene => gene.name);
-  const A0311ligands = A0311.map(gene => gene.ligand);
-
   const Bw4 = patientHLAGenes.filter(gene => {
     if (gene.ligand && gene.ligand.startsWith('Bw4')) {
       return true;
@@ -87,6 +64,29 @@ function process() {
   const C2ligands = C2.map(gene => gene.ligand);
   const C2names = C2.map(gene => gene.name);
 
+  const A11 = patientHLAGenes.filter(gene => {
+    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
+      gene.ligand = 'A11';
+      return true;
+    }
+    return false;
+  });
+  const A11names = A11.map(gene => gene.name);
+  const A11ligands = A11.map(gene => gene.ligand);
+  
+  const A0311 = patientHLAGenes.filter(gene => {
+    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
+      gene.ligand = 'A11';
+      return true;
+    } else if (gene.name.startsWith('A*03') && !gene.name.endsWith('N') ) {
+      gene.ligand = 'A3';
+      return true;
+    }
+    return false;
+  });
+  const A0311names = A0311.map(gene => gene.name);
+  const A0311ligands = A0311.map(gene => gene.ligand);
+
   activatingTableBody.innerHTML = '';
   inhibitoryTableBody.innerHTML = '';
 
@@ -115,8 +115,8 @@ function process() {
     hlaGenes.forEach((hlaGene, index) => {
         const matchingGene = patientHLAGenesPossibilities.find(entry => entry && entry.name === hlaGene);
         let ligandsToDisplay = '';
-        if (matchingGene && matchingGene.ligand.length > 1) {
-            ligandsToDisplay = matchingGene.ligand.join('<br>');
+        if (matchingGene && Array.isArray(matchingGene.ligand) && matchingGene.ligand.length > 1) {
+          ligandsToDisplay = matchingGene.ligand.join('<br>');
         }
 
         const row = document.createElement('tr');
@@ -125,7 +125,7 @@ function process() {
             <td>
                 <div class="tooltip">
                   <span class="kir-ligand">${ligands[index]}</span>
-                  ${matchingGene && matchingGene.ligand.length > 1 ? '<button class="toggle-ligands">+</button>' : ''}
+                    ${matchingGene && Array.isArray(matchingGene.ligand) && matchingGene.ligand.length > 1 ? '<button class="toggle-ligands">+</button>' : ''}
                   <div class="tooltip-text">${ligandsToDisplay}</div>
                 </div>
             </td>
@@ -164,12 +164,18 @@ function process() {
   // Add event listeners for the toggle buttons
   document.querySelectorAll('.toggle-ligands').forEach(button => {
     button.addEventListener('click', (event) => {
-        const tooltip = event.target.nextElementSibling;
-        const tooltipContainer = event.target.parentElement;
+        document.querySelectorAll('.toggle-ligands').forEach(element => {
+          if (element != button) {
+            const container = element.parentElement;
+            container.classList.remove('active');
+            element.textContent = '+';
+          }
+        });
+        const tooltipContainer = button.parentElement;
         tooltipContainer.classList.toggle('active');
-        event.target.textContent = tooltipContainer.classList.contains('active') ? '-' : '+';
+        button.textContent = tooltipContainer.classList.contains('active') ? '-' : '+';
     });
-});
+  });
 }
 
 function getRandomElement(array) {
@@ -236,28 +242,25 @@ function updateHLA() {
 
 function updateHLAgene(elementId, HLA, number) {
   const inputElement = document.getElementById(elementId);
+  //const inputElementContainer = document.getElementById(elementId + "-container");
   const userInput = inputElement.textContent.trim();
-  const formatRegex = /^(A|B|C)\*\d+(:\d+){0,3}[A-Z]?$|^(A|B|C)\*\d+(:\d+){0,3}:$/;
+  const formatRegex = new RegExp(`^(${HLA})\\*\\d{2,4}(:\\d{2,4}){0,3}((N|L|S|Q|C|A)?|:)$`);
 
   if (!formatRegex.test(userInput)) {
-    errorMessageElement.textContent = 'Neplatný vstupní formát.';
-    errorMessageElement.style.display = 'block';
+    //displayError('Neplatný vstupní formát.', inputElementContainer);
+    displayError('Neplatný vstupní formát.');
     return;
-  } else {
-    errorMessageElement.style.display = 'none';
   }
 
-  // Find all genes that start with the user's input
-  const geneCategory = HLA;
-  const matchingGenes = data[geneCategory].filter(gene => gene.name.startsWith(userInput));
-
+  const matchingGenes = data[HLA].filter(gene => gene.name.startsWith(userInput));
   if (matchingGenes.length === 0) {
-    errorMessageElement.textContent = 'Nenalezeny žádné takové geny, zkontolujte vstup.';
-    errorMessageElement.style.display = 'block';
+    // displayError('Nenalezeny žádné takové geny, zkontolujte vstup.', inputElementContainer);
+    displayError('Nenalezeny žádné takové geny, zkontolujte vstup.');
+
     return;
-  } else {
-    errorMessageElement.style.display = 'none';
   }
+
+  errorMessageElement.style.display = 'none';
 
   const ligandCounts = { 'null': 0 };
   matchingGenes.forEach(gene => {
@@ -281,14 +284,14 @@ function updateHLAgene(elementId, HLA, number) {
 
   const ligandPercentageInfo = Object.entries(ligandPercentages)
   .sort(([, a], [, b]) => b - a) // Sort by percentage in descending order
-  .map(([ligand, percentage]) => `${ligand} (${percentage.toFixed(2)}%)`);
+  .map(([ligand, percentage]) => `${ligand} (${percentage.toFixed(2)} %)`);
 
 
   // Update the patientHLAGenes array with the selected gene and ligand percentage
   const exactMatch = matchingGenes.find(gene => gene.name === userInput);
 
   patientHLAGenes[number] = exactMatch || {
-    ligand: `${selectedLigand} (${selectedLigandPercentage.toFixed(2)}%)`,
+    ligand: `${selectedLigand} (${selectedLigandPercentage.toFixed(2)} %)`,
     name: userInput
   };
   
@@ -302,6 +305,18 @@ function updateHLAgene(elementId, HLA, number) {
   console.log('Ligand percentages:', ligandPercentages);
   
 }
+
+function displayError(message) {
+  errorMessageElement.textContent = message;
+  errorMessageElement.style.display = 'block';
+}
+
+// function displayError(message, element) {
+//   const error = element.querySelector('.error-message');
+  
+//   error.textContent = message;
+//   error.style.display = 'block';
+// }
 
 function updateKIRgene(checkbox) {
   const gene = checkbox.id;
@@ -429,7 +444,7 @@ function mergeCategorizedData(existingData, newData) {
 function updateProgressBar(fetched, total) {
   const progress = (fetched / total) * 100;
   progressBar.style.width = `${progress}%`;
-  progressBar.textContent = `${Math.round(progress)}%`;
+  progressBar.textContent = `${Math.round(progress)} %`;
 }
 
 // Usage
