@@ -13,12 +13,19 @@
 
 <body>
     <header id="header">
-        <h1>Bakalářská práce</h1>
-        <h2>Petra Svobodová, 2024</h2>
-        <h3>KKY FAV ZČU</h3>
+        <div id="top-right">
+            <h2>Petra Svobodová, 2024</h2>
+            <h3>KKY FAV ZČU</h3>
+        </div>
+        <h1>Nástroj na vyhodnocení HLA-KIR interakce</h1>
+        
     </header>
 
     <main id="main">
+
+        <div id="loading-message">
+            <p>Načítání dat, prosím vyčkejte...</p>
+        </div>
 
         <div id="progress-container">
             <div id="progress-bar">0%</div>
@@ -35,42 +42,32 @@
                     <th>HLA-B</th>
                     <th>HLA-C</th>
                 </tr>
-                <!-- <tr>
-                    <td contenteditable="true" id="hla-a-row1" oninput="updateHLAgene('hla-a-row1','A', '0')"></td>
-                    <td contenteditable="true" id="hla-b-row1" oninput="updateHLAgene('hla-b-row1','B', '1')"></td>
-                    <td contenteditable="true" id="hla-c-row1" oninput="updateHLAgene('hla-c-row1','C', '2')"></td>
-                </tr>
-                <tr>
-                    <td contenteditable="true" id="hla-a-row2" oninput="updateHLAgene('hla-a-row2','A', '3')"></td>
-                    <td contenteditable="true" id="hla-b-row2" oninput="updateHLAgene('hla-b-row2','B', '4')"></td>
-                    <td contenteditable="true" id="hla-c-row2" oninput="updateHLAgene('hla-c-row2','C', '5')"></td>
-                </tr> -->
 
                 <tr>
                     <td contenteditable="false" id="hla-a-row1-container" oninput="updateHLAgene('hla-a-row1','A', '0')">
-                        <div id="hla-a-row1" contenteditable="true"></div>
+                        <div id="hla-a-row1" contenteditable="true">A*</div>
                         <div class="error-message" contenteditable="false"></div>
                     </td>
                     <td contenteditable="false" id="hla-b-row1-container" oninput="updateHLAgene('hla-b-row1','B', '1')">
-                        <div id="hla-b-row1" contenteditable="true"></div>
+                        <div id="hla-b-row1" contenteditable="true">B*</div>
                         <div class="error-message" contenteditable="false"></div>
                     </td>
                     <td contenteditable="false" id="hla-c-row1-container" oninput="updateHLAgene('hla-c-row1','C', '2')">
-                        <div id="hla-c-row1" contenteditable="true"></div>
+                        <div id="hla-c-row1" contenteditable="true">C*</div>
                         <div class="error-message" contenteditable="false"></div>
                     </td>
                 </tr>
                 <tr>
                     <td contenteditable="false" id="hla-a-row2-container" oninput="updateHLAgene('hla-a-row2','A', '3')">
-                        <div id="hla-a-row2" contenteditable="true"></div>
+                        <div id="hla-a-row2" contenteditable="true">A*</div>
                         <div class="error-message" contenteditable="false"></div>
                     </td>
                     <td contenteditable="false" id="hla-b-row2-container" oninput="updateHLAgene('hla-b-row2','B', '4')">
-                        <div id="hla-b-row2" contenteditable="true"></div>
+                        <div id="hla-b-row2" contenteditable="true">B*</div>
                         <div class="error-message" contenteditable="false"></div>
                     </td>
                     <td contenteditable="false" id="hla-c-row2-container" oninput="updateHLAgene('hla-c-row2','C', '5')">
-                        <div id="hla-c-row2" contenteditable="true"></div>
+                        <div id="hla-c-row2" contenteditable="true">C*</div>
                         <div class="error-message" contenteditable="false"></div>
                     </td>
                 </tr>
@@ -124,16 +121,11 @@
                     <th class="update-cell" colspan="16"><button class ="update" onclick="updateKIR()">Vygenerovat náhodnou KIR typizaci</button></th>
                 </tr>
             </table>
-
             <br>
-            <div id="error-message-after"></div>       
-
             <button id="process-button" onclick="process()">
                 <div>Vyhodnotit</div>
                 <div id="wrong-input" class="error-message" style="display: none;">Není možné vyhodnocení, špatně zadaná vstupní data</div>
-            </button>
-
-            
+            </button>            
 
             <br><br>
 

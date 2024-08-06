@@ -3,9 +3,9 @@
     justify-content: center;
     align-items: flex-start;
     width: 70%;
-    margin: auto; /* Centers the container */
+    margin: auto;
     margin-bottom: 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   }
@@ -40,7 +40,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* justify-content: center; */
     min-height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
@@ -49,6 +48,26 @@ header, main {
     text-align: center;
     width: 100%;
 }
+
+#header {
+    background-color: #4caf50;
+    color: white;
+    padding: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#top-right {
+    position:absolute;
+    top: 0;
+    right: 0;
+}
+
+#top-right h2, #top-right h3 {
+    margin: 5px;
+    text-align: end;
+}
+
+
 #HLA-table, #KIR-table {
     width: 70%;
     border-collapse: collapse;
@@ -58,11 +77,11 @@ header, main {
 }
 
 #KIR-table th, #KIR-table td {
-    width: 6.25%; /* Approximately 100% / 16 columns */
+    width: 6.25%;
 }
 
 #HLA-table th, #HLA-table td, #inhibitory th, #inhibitory td,  #activating th, #activating td{
-    width: 33.3%; /* Approximately 100% / 16 columns */
+    width: 33.3%;
 }
 
 th, td {
@@ -94,9 +113,10 @@ th {
 #progress-container {
     width: 70%;
     background-color: #f3f3f3;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     margin-left: auto;
     margin-right: auto;
+    border-radius: 5px;
 }
 
 #progress-bar {
@@ -108,33 +128,31 @@ th {
     font-weight: bold;
     line-height: 30px;
 }
-/* Tooltip container */
+
 .tooltip {
     position: relative;
     display: inline-block;
 }
 
-/* Tooltip text */
 .tooltip .tooltip-text {
     visibility: hidden;
-    background-color: #efefef; /* Darker background for better visibility */
+    background-color: #efefef;
     border: 1px solid;
     color: #000000;
-    text-align: left; /* Left-align text */
-    border-radius: 6px; /* Rounded corners */
-    padding: 7px; /* Padding for better readability */
+    text-align: left;
+    border-radius: 6px;
+    padding: 7px;
     position: absolute;
     z-index: 1;
-    top: 50%; /* Center vertically */
-    left: 105%; /* Position to the right of the button */
-    transform: translateY(-50%); /* Center vertically in relation to the button */
+    top: 50%;
+    left: 105%;
+    transform: translateY(-50%);
     opacity: 0;
     transition: opacity 0.3s;
-    white-space: nowrap; /* Prevent text wrapping */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow for better visibility */
+    white-space: nowrap;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* Show the tooltip text when the 'active' class is added */
 .tooltip.active .tooltip-text {
     visibility: visible;
     opacity: 1;
@@ -147,17 +165,12 @@ input[type="checkbox"] {
 .error-message {
     display: none;
     min-height: 0;
-    margin-top: 4px; /* Adjust this if needed */
-    /* position: absolute; */
+    margin-top: 4px;
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
     padding: 5px;
     border-radius: 4px;
-    /* z-index: 1000;
-    top: 50%;
-    left: 70%;
-    transform: translateY(-50%); */
     white-space: nowrap;
     box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
 }
@@ -166,20 +179,27 @@ td {
     position: relative;
 } 
 
-td div[id^="hla-"] {
-    min-height: 17.5px; /* Adjust this value if necessary */
-}
-
-
 td div {
     margin: 0;
     padding: 0;
 }
 
-
-/* Ensure the divs inside td are consistent in height */
 td div[contenteditable="true"] {
-    min-height: 17.5px; /* Adjust this value if necessary */
+    min-height: 17.5px;
     outline: none;
     padding: 0px;
 }
+#loading-message {
+    width: 70%;
+    text-align: center;
+    font-size: 1.2em;
+    color: #333; /* Adjust the color to match your design */
+    margin: 10px auto;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+#loading-message p{
+    margin: 5px;
+}
+

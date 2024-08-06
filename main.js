@@ -4,12 +4,13 @@ const activatingMessage = document.getElementById('activating-message');
 const inhibitoryMessage = document.getElementById('inhibitory-message');
 const activatingTable = document.getElementById('activating');
 const inhibitoryTable = document.getElementById('inhibitory');
-const errorMessageElement = document.getElementById('error-message-after');
 const ligandInfoElement = document.getElementById('ligand-info');
 const progressBar = document.getElementById('progress-bar');
 const wrongInputMessage = document.getElementById('wrong-input');
 const results = document.getElementById('results');
 const tool = document.getElementById('tool');
+const loading = document.getElementById('loading-message');
+const progress = document.getElementById('progress-container');
 
 let patientHLAGenes = [];
 
@@ -211,6 +212,10 @@ function updateHLA() {
     };
 
   inputCheck.fill(1);
+  const errors = tool.querySelectorAll('.error-message');
+  errors.forEach(error => {
+    error.style.display = 'none';
+  });
 }
 
 function updateHLAgene(elementId, HLA, number) {
@@ -218,7 +223,7 @@ function updateHLAgene(elementId, HLA, number) {
   const inputElementContainer = document.getElementById(elementId + "-container");
   const error = inputElementContainer.querySelector('.error-message');
   const userInput = inputElement.textContent.trim();
-  const formatRegex = new RegExp(`^(${HLA})\\*\\d{2,4}(:\\d{2,4}){0,3}((N|L|S|Q|C|A)?|:)$`);
+  const formatRegex = new RegExp(`^(${HLA})\\*\\d{1,4}(:\\d{1,4}){0,3}((N|L|S|Q|C|A)?|:)$`);
 
   if (userInput == '') {
     patientHLAGenes[number] = {
@@ -432,6 +437,8 @@ fetchAllData(apiUrl)
   .then(categorizedData => {
     data = categorizedData;
     tool.style.display = 'block';
+    loading.style.display = 'none';
+    progress.style.display = 'none';
   })
   .catch(error => console.error('Failed to fetch all data:', error));
 
