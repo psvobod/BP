@@ -144,18 +144,20 @@ input[type="checkbox"] {
     accent-color: #4caf50;    
 }
 
-/* .error-message {
+.error-message {
     display: none;
-    position: absolute;
+    min-height: 0;
+    margin-top: 4px; /* Adjust this if needed */
+    /* position: absolute; */
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
     padding: 5px;
     border-radius: 4px;
-    z-index: 1000;
+    /* z-index: 1000;
     top: 50%;
     left: 70%;
-    transform: translateY(-50%);
+    transform: translateY(-50%); */
     white-space: nowrap;
     box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
 }
@@ -163,4 +165,21 @@ input[type="checkbox"] {
 td {
     position: relative;
 } 
-*/
+
+td div[id^="hla-"] {
+    min-height: 17.5px; /* Adjust this value if necessary */
+}
+
+
+td div {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Ensure the divs inside td are consistent in height */
+td div[contenteditable="true"] {
+    min-height: 17.5px; /* Adjust this value if necessary */
+    outline: none;
+    padding: 0px;
+}

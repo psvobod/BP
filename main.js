@@ -7,6 +7,9 @@ const inhibitoryTable = document.getElementById('inhibitory');
 const errorMessageElement = document.getElementById('error-message-after');
 const ligandInfoElement = document.getElementById('ligand-info');
 const progressBar = document.getElementById('progress-bar');
+const wrongInputMessage = document.getElementById('wrong-input');
+const results = document.getElementById('results');
+const tool = document.getElementById('tool');
 
 let patientHLAGenes = [];
 
@@ -33,30 +36,18 @@ let donorKIRgenes = {
   '3DL2': 1,
 };
 
+let inputCheck = [1, 1, 1, 1, 1, 1];
+
 function process() {
 
-  const Bw4 = patientHLAGenes.filter(gene => {
-    if (gene.ligand && gene.ligand.startsWith('Bw4')) {
-      return true;
-    } else if (['A*23', 'A*24', 'A*32'].some(prefix => gene.name.startsWith(prefix)) && !gene.name.endsWith('N')) {
-      gene.ligand = 'Bw4';
-      return true;
-    }
-    return false;
-  });
+  if (checkInput()) return;
+
+  const Bw4 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('Bw4'));
 
   const Bw4ligands =  Bw4.map(gene => gene.ligand);
   const Bw4names = Bw4.map(gene => gene.name);
 
-  const C1 = patientHLAGenes.filter(gene => {
-    if (gene.ligand && gene.ligand.startsWith('C1')) {
-      return true;
-    } else if (['B*46', 'B*73'].some(prefix => gene.name.startsWith(prefix)) && !gene.name.endsWith('N')) {
-      gene.ligand = 'C1';
-      return true;
-    }
-    return false;
-  });
+  const C1 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('C1'));
   const C1ligands = C1.map(gene => gene.ligand);
   const C1names = C1.map(gene => gene.name);
 
@@ -64,26 +55,11 @@ function process() {
   const C2ligands = C2.map(gene => gene.ligand);
   const C2names = C2.map(gene => gene.name);
 
-  const A11 = patientHLAGenes.filter(gene => {
-    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
-      gene.ligand = 'A11';
-      return true;
-    }
-    return false;
-  });
+  const A11 = patientHLAGenes.filter(gene => gene.ligand && gene.ligand.startsWith('A11'));
   const A11names = A11.map(gene => gene.name);
   const A11ligands = A11.map(gene => gene.ligand);
   
-  const A0311 = patientHLAGenes.filter(gene => {
-    if (gene.name.startsWith('A*11') && !gene.name.endsWith('N') ) {
-      gene.ligand = 'A11';
-      return true;
-    } else if (gene.name.startsWith('A*03') && !gene.name.endsWith('N') ) {
-      gene.ligand = 'A3';
-      return true;
-    }
-    return false;
-  });
+  const A0311 = patientHLAGenes.filter(gene => gene.ligand && ['A3', 'A11'].some(prefix =>  gene.ligand.startsWith(prefix)));
   const A0311names = A0311.map(gene => gene.name);
   const A0311ligands = A0311.map(gene => gene.ligand);
 
@@ -132,12 +108,10 @@ function process() {
             <td>${hlaGene}</td>
         `;
 
-        // Append the row to the table
         tableBody.appendChild(row);
     });
   };
 
-  // Process interactions
   let hasActivatingInteractions = false;
   let hasInhibitoryInteractions = false;
 
@@ -159,7 +133,7 @@ function process() {
   inhibitoryTable.style.display = hasInhibitoryInteractions ? 'table' : 'none';
   inhibitoryMessage.style.display = hasInhibitoryInteractions ? 'none' : 'block';
 
-  document.getElementById('results').style.display = 'flex';
+  results.style.display = 'flex';
 
   // Add event listeners for the toggle buttons
   document.querySelectorAll('.toggle-ligands').forEach(button => {
@@ -236,31 +210,43 @@ function updateHLA() {
       name: geneC2.name
     };
 
-  console.log(patientHLAGenes);
-
+  inputCheck.fill(1);
 }
 
 function updateHLAgene(elementId, HLA, number) {
   const inputElement = document.getElementById(elementId);
-  //const inputElementContainer = document.getElementById(elementId + "-container");
+  const inputElementContainer = document.getElementById(elementId + "-container");
+  const error = inputElementContainer.querySelector('.error-message');
   const userInput = inputElement.textContent.trim();
   const formatRegex = new RegExp(`^(${HLA})\\*\\d{2,4}(:\\d{2,4}){0,3}((N|L|S|Q|C|A)?|:)$`);
 
+  if (userInput == '') {
+    patientHLAGenes[number] = {
+      ligand: 'null',
+      name: userInput
+    };
+    inputCheck[+number] = 1;
+    error.style.display = 'none';
+    checkInput();
+    return;
+  }
+
   if (!formatRegex.test(userInput)) {
-    //displayError('Neplatný vstupní formát.', inputElementContainer);
-    displayError('Neplatný vstupní formát.');
+    displayError('Neodpovídá požadovanému formátu.', error);
+    inputCheck[+number] = 0;
     return;
   }
 
   const matchingGenes = data[HLA].filter(gene => gene.name.startsWith(userInput));
   if (matchingGenes.length === 0) {
-    // displayError('Nenalezeny žádné takové geny, zkontolujte vstup.', inputElementContainer);
-    displayError('Nenalezeny žádné takové geny, zkontolujte vstup.');
-
+    displayError('Nenalezeny žádné takové alely', error);
+    inputCheck[+number] = 0;
     return;
   }
 
-  errorMessageElement.style.display = 'none';
+  inputCheck[+number] = 1;
+  error.style.display = 'none';
+  checkInput();
 
   const ligandCounts = { 'null': 0 };
   matchingGenes.forEach(gene => {
@@ -274,20 +260,17 @@ function updateHLAgene(elementId, HLA, number) {
     ligandPercentages[ligand] = (ligandCounts[ligand] / totalMatches) * 100;
   });
   
-  // Randomly select a gene from the matching genes
-  const randomGeneIndex = Math.floor(Math.random() * matchingGenes.length);
-  const selectedGene = matchingGenes[randomGeneIndex];
-  const selectedLigand = selectedGene.ligand || 'null';
+  const mostProbableLigand = Object.entries(ligandPercentages).reduce((max, current) => {
+    return current[1] > max[1] ? current : max;
+  });
 
-  // Find the percentage of the selected ligand
-  const selectedLigandPercentage = ligandPercentages[selectedLigand] || 0;
+  const selectedLigand = mostProbableLigand[0];
+  const selectedLigandPercentage = mostProbableLigand[1];
 
   const ligandPercentageInfo = Object.entries(ligandPercentages)
-  .sort(([, a], [, b]) => b - a) // Sort by percentage in descending order
+  .sort(([, a], [, b]) => b - a) // Sorting by percentage in descending order
   .map(([ligand, percentage]) => `${ligand} (${percentage.toFixed(2)} %)`);
 
-
-  // Update the patientHLAGenes array with the selected gene and ligand percentage
   const exactMatch = matchingGenes.find(gene => gene.name === userInput);
 
   patientHLAGenes[number] = exactMatch || {
@@ -298,30 +281,29 @@ function updateHLAgene(elementId, HLA, number) {
   patientHLAGenesPossibilities[number] = exactMatch || {
     ligand: ligandPercentageInfo,
     name: userInput
-  };
-
-  console.log('Updated HLA genes:', patientHLAGenes);
-  console.log('Selected gene and ligand:', selectedGene.name, selectedLigand);
-  console.log('Ligand percentages:', ligandPercentages);
-  
+  };  
 }
 
-function displayError(message) {
-  errorMessageElement.textContent = message;
-  errorMessageElement.style.display = 'block';
+function checkInput() {
+  if (!inputCheck.every(element => element === 1)) {
+    wrongInputMessage.style.display = 'block';
+    results.style.display = 'none';
+    return true;
+  } else {
+    wrongInputMessage.style.display = 'none';
+    return false;
+  }
 }
 
-// function displayError(message, element) {
-//   const error = element.querySelector('.error-message');
+function displayError(message, error) {
   
-//   error.textContent = message;
-//   error.style.display = 'block';
-// }
+  error.textContent = message;
+  error.style.display = 'block';
+}
 
 function updateKIRgene(checkbox) {
   const gene = checkbox.id;
   donorKIRgenes[gene] = checkbox.checked ? 1 : 0;
-  //console.log(donorKIRgenes);
 }
 
 function updateKIR() {
@@ -342,8 +324,6 @@ function updateKIR() {
       checkbox.checked = true;
       donorKIRgenes[gene] = 1;
   });
-
-  //console.log(donorKIRgenes);
 }
 
 async function fetchAllData(url) {
@@ -388,7 +368,6 @@ async function fetchAllData(url) {
 
           const data = await response.json();
 
-          // Categorize the data based on the name prefix
           const categorizedBatch = categorizeData(data.data);
           categorizedData = mergeCategorizedData(categorizedData, categorizedBatch);
           fetchedItems += data.data.length;
@@ -415,12 +394,12 @@ function categorizeData(data) {
       const name = record.name || '';
       if (name.startsWith('A*')) {
           categorized.A.push({
-              ligand: record['matching.kir_ligand'],
+              ligand: name.startsWith('A*03')&&!name.endsWith('N') ? 'A3' : name.startsWith('A*11')&&!name.endsWith('N') ? 'A11' : ['A*23', 'A*24', 'A*32'].some(prefix => name.startsWith(prefix)) && !name.endsWith('N') ? 'Bw4' : record['matching.kir_ligand'],
               name: record.name
           });
       } else if (name.startsWith('B*')) {
           categorized.B.push({
-              ligand: record['matching.kir_ligand'],
+              ligand: ['B*46', 'B*73'].some(prefix => name.startsWith(prefix)) && !name.endsWith('N') ? 'C1' : record['matching.kir_ligand'],
               name: record.name
           });
       } else if (name.startsWith('C*')) {
@@ -447,28 +426,13 @@ function updateProgressBar(fetched, total) {
   progressBar.textContent = `${Math.round(progress)} %`;
 }
 
-// Usage
 const apiUrl = 'https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=5000&project=HLA&query=and(or(eq(locus,C*),eq(locus,B*),eq(locus,A*)),eq(status,public))&fields=matching.kir_ligand';
 
 fetchAllData(apiUrl)
   .then(categorizedData => {
     data = categorizedData;
+    tool.style.display = 'block';
   })
   .catch(error => console.error('Failed to fetch all data:', error));
-
-
-/*
-Možnosti:
-
-https://hla.alleles.org/proteins/class1.html
-https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/wmda/hla_nom.txt
-https://www.ebi.ac.uk/ipd/imgt/hla/about/help/api/
-https://www.ebi.ac.uk/cgi-bin/ipd/matching/kir_ligand?pid=Patient&patb1=07:02&patb2=08:01&patc1=07:01&patc2=07:02&did=Donor&donb1=07:02&donb2=08&donc1=07:01&donc2=07:02
-https://www.ebi.ac.uk/cgi-bin/ipd/api/allele?limit=1000&project=HLA&query=startsWith%28name%2C%2522B%2A08%2522%29&fields=matching.kir_ligand
-
-https://www.ebi.ac.uk/ipd/rest/#/
-
-
-*/
 
 
